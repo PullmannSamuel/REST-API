@@ -3,117 +3,117 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.Divizia;
+using api.Dtos.Division;
 using api.Interfaces;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
 {
-    public class DiviziaRepository : IDiviziaRepository
+    public class DivisionRepository : IDivisionRepository
     {
         private readonly ApplicationDBContext context;
-        public DiviziaRepository(ApplicationDBContext context)
+        public DivisionRepository(ApplicationDBContext context)
         {
             this.context = context;
         }
-        public async Task<Divizia> CreateAsync(Divizia diviziaModel)
+        public async Task<Division> CreateAsync(Division divisionModel)
         {
-            var firma = await context.firmy.FirstOrDefaultAsync(f => f.id == diviziaModel.firmaId);
-            if (firma == null)
+            var company = await context.companies.FirstOrDefaultAsync(f => f.id == divisionModel.companyId);
+            if (company == null)
             {
-                return diviziaModel;
+                return divisionModel;
             }
 
-            await context.divizie.AddAsync(diviziaModel);
+            await context.divisions.AddAsync(divisionModel);
             await context.SaveChangesAsync();
 
-            firma.divizieId.Add(diviziaModel.id);
+            company.divisionsId.Add(divisionModel.id);
             await context.SaveChangesAsync();
 
-            var divizia = await context.divizie
-                .Include(x => x.veduciDivizie)
-                .FirstOrDefaultAsync(x => x.id == diviziaModel.id);
+            var division = await context.divisions
+                .Include(x => x.headOfDivision)
+                .FirstOrDefaultAsync(x => x.id == divisionModel.id);
 
-            if (divizia != null) {
-                return divizia;
+            if (division != null) {
+                return division;
             }
 
-            return diviziaModel;
+            return divisionModel;
         }
 
-        public async Task<Divizia?> DeleteAsync(int id)
+        public async Task<Division?> DeleteAsync(int id)
         {
-            var divizia = await context.divizie.FirstOrDefaultAsync(d => d.id == id);
+            var division = await context.divisions.FirstOrDefaultAsync(d => d.id == id);
 
-            if (divizia == null) {
+            if (division == null) {
                 return null;
             }
 
-            context.divizie.Remove(divizia);
+            context.divisions.Remove(division);
             await context.SaveChangesAsync();
 
-            var firma = await context.firmy.FirstOrDefaultAsync(f => f.id == divizia.firmaId);
+            var company = await context.companies.FirstOrDefaultAsync(f => f.id == division.companyId);
             
-            if (firma != null) {
-                firma.divizieId.Remove(divizia.id);
+            if (company != null) {
+                company.divisionsId.Remove(division.id);
                 await context.SaveChangesAsync();
             }
             
-            return divizia;
+            return division;
         }
 
-        public async Task<List<Divizia>> GetAllAsync()
+        public async Task<List<Division>> GetAllAsync()
         {
-            return await context.divizie
-                .Include(d => d.veduciDivizie).ToListAsync();
+            return await context.divisions
+                .Include(d => d.headOfDivision).ToListAsync();
         }
 
-        public async Task<Divizia?> GetByIdAsync(int id)
+        public async Task<Division?> GetByIdAsync(int id)
         {
-            return await context.divizie
-                .Include(d => d.veduciDivizie).FirstOrDefaultAsync(d => d.id == id);
+            return await context.divisions
+                .Include(d => d.headOfDivision).FirstOrDefaultAsync(d => d.id == id);
         }
 
-        public async Task<Divizia?> UpdateAsync(int firmaId, int diviziaId, UpdateDiviziaRequestDto diviziaDto)
+        public async Task<Division?> UpdateAsync(int companyId, int divisionId, UpdateDivisionRequestDto divisionDto)
         {
-            var diviziaModel = await context.divizie
-                .Include(d => d.veduciDivizie)
-                .FirstOrDefaultAsync(d => d.id == diviziaId);
+            var divisionModel = await context.divisions
+                .Include(d => d.headOfDivision)
+                .FirstOrDefaultAsync(d => d.id == divisionId);
 
-            if (diviziaModel == null) {
+            if (divisionModel == null) {
                 return null;
             }
 
-            if (diviziaModel.firmaId != firmaId) {
-                var removeFromFirma = await context.firmy.FirstOrDefaultAsync(f => f.id == diviziaModel.firmaId);
-                var addToFirma = await context.firmy.FirstOrDefaultAsync(f => f.id == firmaId);
+            if (divisionModel.companyId != companyId) {
+                var removeFromCompany = await context.companies.FirstOrDefaultAsync(f => f.id == divisionModel.companyId);
+                var addToCompany = await context.companies.FirstOrDefaultAsync(f => f.id == companyId);
                 
-                if (removeFromFirma != null) 
+                if (removeFromCompany != null) 
                 {
-                    removeFromFirma.divizieId.Remove(diviziaId);
+                    removeFromCompany.divisionsId.Remove(divisionId);
                 }
 
-                if (addToFirma == null)
+                if (addToCompany == null)
                 {
                     return null;
                 }
-                addToFirma.divizieId.Add(diviziaId);
+                addToCompany.divisionsId.Add(divisionId);
             }
 
-            diviziaModel.nazov = diviziaDto.nazov;
-            diviziaModel.kod = diviziaDto.kod;
-            diviziaModel.veduciDivizieId = diviziaDto.veduciDivizieId;
-            diviziaModel.firmaId = firmaId;
+            divisionModel.name = divisionDto.name;
+            divisionModel.code = divisionDto.code;
+            divisionModel.headOfDivisionId = divisionDto.headOfDivisionId;
+            divisionModel.companyId = companyId;
 
             await context.SaveChangesAsync();
 
-            return diviziaModel;
+            return divisionModel;
         }
 
-        public async Task<bool> DiviziaExists(int id)
+        public async Task<bool> DivisionExists(int id)
         {
-            return await context.divizie.AnyAsync(d => d.id == id);
+            return await context.divisions.AnyAsync(d => d.id == id);
         }
     }
 }

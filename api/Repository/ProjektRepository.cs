@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.Projekt;
+using api.Dtos.Project;
 using api.Interfaces;
 using api.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -11,109 +11,109 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
 {
-    public class ProjektRepository : IProjektRepository
+    public class ProjectRepository : IProjectRepository
     {
         private readonly ApplicationDBContext context;
-        public ProjektRepository(ApplicationDBContext context)
+        public ProjectRepository(ApplicationDBContext context)
         {
             this.context = context;
         }
-        public async Task<Projekt> CreateAsync(Projekt projektModel)
+        public async Task<Project> CreateAsync(Project projectModel)
         {
-            var divizia = await context.divizie.FirstOrDefaultAsync(d => d.id == projektModel.diviziaId);
+            var division = await context.divisions.FirstOrDefaultAsync(d => d.id == projectModel.divisionId);
             
-            if (divizia == null) {
-                return projektModel;
+            if (division == null) {
+                return projectModel;
             }
 
-            await context.projekty.AddAsync(projektModel);
+            await context.projects.AddAsync(projectModel);
             await context.SaveChangesAsync();
 
-            divizia.projektyId.Add(projektModel.id);
+            division.projectsId.Add(projectModel.id);
             await context.SaveChangesAsync();
 
-            var projekt = await context.projekty
-                .Include(x => x.veduciProjektu)
-                .FirstOrDefaultAsync(x => x.id == projektModel.id);
+            var project = await context.projects
+                .Include(x => x.projectManager)
+                .FirstOrDefaultAsync(x => x.id == projectModel.id);
 
-            if (projekt != null) {
-                return projekt;
+            if (project != null) {
+                return project;
             }
 
-            return projektModel;
+            return projectModel;
         }
 
-        public async Task<Projekt?> DeleteAsync(int id)
+        public async Task<Project?> DeleteAsync(int id)
         {
-            var projekt = await context.projekty.FirstOrDefaultAsync(p => p.id == id);
+            var project = await context.projects.FirstOrDefaultAsync(p => p.id == id);
 
-            if (projekt == null) {
+            if (project == null) {
                 return null;
             }
 
-            context.projekty.Remove(projekt);
+            context.projects.Remove(project);
             await context.SaveChangesAsync();
 
-            var divizia = await context.divizie.FirstOrDefaultAsync(d => d.id == projekt.diviziaId);
+            var division = await context.divisions.FirstOrDefaultAsync(d => d.id == project.divisionId);
 
-            if (divizia != null) {
-                divizia.projektyId.Remove(projekt.id);
+            if (division != null) {
+                division.projectsId.Remove(project.id);
                 await context.SaveChangesAsync();
             }
 
-            return projekt;
+            return project;
         }
 
-        public async Task<List<Projekt>> GetAllAsync()
+        public async Task<List<Project>> GetAllAsync()
         {
-            return await context.projekty
-                .Include(p => p.veduciProjektu).ToListAsync();
+            return await context.projects
+                .Include(p => p.projectManager).ToListAsync();
         }
 
-        public async Task<Projekt?> GetByIdAsync(int id)
+        public async Task<Project?> GetByIdAsync(int id)
         {
-            return await context.projekty
-                .Include(p => p.veduciProjektu).FirstOrDefaultAsync(p => p.id == id);
+            return await context.projects
+                .Include(p => p.projectManager).FirstOrDefaultAsync(p => p.id == id);
         }
 
-        public async Task<Projekt?> UpdateAsync(int diviziaId, int projektId, UpdateProjektRequestDto projektDto)
+        public async Task<Project?> UpdateAsync(int divisionId, int projectId, UpdateProjectRequestDto projectDto)
         {
-            var projektModel = await context.projekty
-                .Include(p => p.veduciProjektu)
-                .FirstOrDefaultAsync(p => p.id == projektId);
+            var projectModel = await context.projects
+                .Include(p => p.projectManager)
+                .FirstOrDefaultAsync(p => p.id == projectId);
 
-            if (projektModel == null) {
+            if (projectModel == null) {
                 return null;
             }
 
-            if (projektModel.diviziaId != diviziaId) {
-                var removeFromDivizia = await context.divizie.FirstOrDefaultAsync(d => d.id == projektModel.diviziaId);
-                var addToDivizia = await context.divizie.FirstOrDefaultAsync(d => d.id == diviziaId);
+            if (projectModel.divisionId != divisionId) {
+                var removeFromDivision = await context.divisions.FirstOrDefaultAsync(d => d.id == projectModel.divisionId);
+                var addToDivision = await context.divisions.FirstOrDefaultAsync(d => d.id == divisionId);
 
-                if (removeFromDivizia != null) {
-                    removeFromDivizia.projektyId.Remove(projektId);
+                if (removeFromDivision != null) {
+                    removeFromDivision.projectsId.Remove(projectId);
                 }
 
-                if (addToDivizia == null) {
+                if (addToDivision == null) {
                     return null;
                 }
 
-                addToDivizia.projektyId.Add(projektId);
+                addToDivision.projectsId.Add(projectId);
             }
 
-            projektModel.nazov = projektDto.nazov;
-            projektModel.kod = projektDto.kod;
-            projektModel.veduciProjektuId = projektDto.veduciProjektuId;
-            projektModel.diviziaId = diviziaId;
+            projectModel.name = projectDto.name;
+            projectModel.code = projectDto.code;
+            projectModel.projectManagerId = projectDto.projectManagerId;
+            projectModel.divisionId = divisionId;
 
             await context.SaveChangesAsync();
 
-            return projektModel;
+            return projectModel;
         }
 
-        public async Task<bool> ProjektExists(int id)
+        public async Task<bool> ProjectExists(int id)
         {
-            return await context.projekty.AnyAsync(p => p.id == id);
+            return await context.projects.AnyAsync(p => p.id == id);
         }
     }
 }

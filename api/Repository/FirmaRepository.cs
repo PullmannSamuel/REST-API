@@ -3,85 +3,85 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.Firma;
+using api.Dtos.Company;
 using api.Interfaces;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
 {
-    public class FirmaRepository : IFirmaRepository
+    public class CompanyRepository : ICompanyRepository
     {
         private readonly ApplicationDBContext context;
-        public FirmaRepository(ApplicationDBContext context) 
+        public CompanyRepository(ApplicationDBContext context) 
         {
             this.context = context;
         }
 
-        public async Task<Firma> CreateAsync(Firma firmaModel)
+        public async Task<Company> CreateAsync(Company companyModel)
         {
-            await context.firmy.AddAsync(firmaModel);
+            await context.companies.AddAsync(companyModel);
             await context.SaveChangesAsync();
 
-            var firma = await context.firmy
-                .Include(x => x.riaditel)
-                .FirstOrDefaultAsync(f => f.id == firmaModel.id);
+            var company = await context.companies
+                .Include(x => x.director)
+                .FirstOrDefaultAsync(f => f.id == companyModel.id);
             
-            if (firma != null) {
-                return firma;
+            if (company != null) {
+                return company;
             }
 
-            return firmaModel;
+            return companyModel;
         }
 
-        public async Task<Firma?> DeleteAsync(int id)
+        public async Task<Company?> DeleteAsync(int id)
         {
-            var firmaModel = await context.firmy.FirstOrDefaultAsync(f => f.id == id);
+            var companyModel = await context.companies.FirstOrDefaultAsync(f => f.id == id);
 
-            if (firmaModel == null) {
+            if (companyModel == null) {
                 return null;
             }
 
-            context.firmy.Remove(firmaModel);
+            context.companies.Remove(companyModel);
             await context.SaveChangesAsync();
 
-            return firmaModel;
+            return companyModel;
         }
         
-        public async Task<List<Firma>> GetAllAsync()
+        public async Task<List<Company>> GetAllAsync()
         {
-            return await context.firmy
-                .Include(f => f.riaditel).ToListAsync();
+            return await context.companies
+                .Include(f => f.director).ToListAsync();
         }
 
-        public async Task<Firma?> GetByIdAsync(int id)
+        public async Task<Company?> GetByIdAsync(int id)
         {
-            return await context.firmy
-                .Include(f => f.riaditel).FirstOrDefaultAsync(f => f.id == id);
+            return await context.companies
+                .Include(f => f.director).FirstOrDefaultAsync(f => f.id == id);
         }
 
-        public async Task<Firma?> UpdateAsync(int id, UpdateFirmaRequestDto firmaDto)
+        public async Task<Company?> UpdateAsync(int id, UpdateCompanyRequestDto companyDto)
         {
-            var firmaModel = await context.firmy
-                .Include(x => x.riaditel)
+            var companyModel = await context.companies
+                .Include(x => x.director)
                 .FirstOrDefaultAsync(f => f.id == id);
 
-            if (firmaModel == null) {
+            if (companyModel == null) {
                 return null;
             }
 
-            firmaModel.nazov = firmaDto.nazov;
-            firmaModel.kod = firmaDto.kod;
-            firmaModel.riaditelId = firmaDto.riaditelId;
+            companyModel.name = companyDto.name;
+            companyModel.code = companyDto.code;
+            companyModel.directorId = companyDto.directorId;
 
             await context.SaveChangesAsync();
 
-            return firmaModel;
+            return companyModel;
         }
 
-        public async Task<bool> FirmaExists(int id)
+        public async Task<bool> CompanyExists(int id)
         {
-            return await context.firmy.AnyAsync(f => f.id == id);
+            return await context.companies.AnyAsync(f => f.id == id);
         }
     }
 }

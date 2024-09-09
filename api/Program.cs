@@ -15,11 +15,11 @@ builder.Services.AddDbContext<ApplicationDBContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddScoped<IFirmaRepository, FirmaRepository>();
-builder.Services.AddScoped<IDiviziaRepository, DiviziaRepository>();
-builder.Services.AddScoped<IProjektRepository, ProjektRepository>();
-builder.Services.AddScoped<IOddelenieRepository, OddelenieRepository>();
-builder.Services.AddScoped<IZamestnanecRepository, ZamestnanecRepository>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<IDivisionRepository, DivisionRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 var app = builder.Build();
 

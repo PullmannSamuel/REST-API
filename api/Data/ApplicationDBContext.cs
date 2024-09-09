@@ -15,11 +15,11 @@ namespace api.Data
             
         }
 
-        public DbSet<Zamestnanec> zamestnanci { get; set; }
-        public DbSet<Firma> firmy { get; set; }
-        public DbSet<Divizia> divizie { get; set; }
-        public DbSet<Projekt> projekty { get; set; }
-        public DbSet<Oddelenie> oddelenia { get; set; }
+        public DbSet<Employee> employees { get; set; }
+        public DbSet<Company> companies { get; set; }
+        public DbSet<Division> divisions { get; set; }
+        public DbSet<Project> projects { get; set; }
+        public DbSet<Department> departments { get; set; }
 
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
-using api.Dtos.Oddelenie;
+using api.Dtos.Department;
 using api.Interfaces;
 using api.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -11,104 +11,104 @@ using Microsoft.EntityFrameworkCore;
 
 namespace api.Repository
 {
-    public class OddelenieRepository : IOddelenieRepository
+    public class DepartmentRepository : IDepartmentRepository
     {
         private readonly ApplicationDBContext context;
-        public OddelenieRepository(ApplicationDBContext context)
+        public DepartmentRepository(ApplicationDBContext context)
         {
             this.context = context;
         }
-        public async Task<Oddelenie> CreateAsync(Oddelenie oddelenieModel)
+        public async Task<Department> CreateAsync(Department departmentModel)
         {
-            var projekt = await context.projekty.FirstOrDefaultAsync(p => p.id == oddelenieModel.projektId);
+            var project = await context.projects.FirstOrDefaultAsync(p => p.id == departmentModel.projectId);
 
-            if (projekt == null) {
-                return oddelenieModel;
+            if (project == null) {
+                return departmentModel;
             }
 
-            await context.oddelenia.AddAsync(oddelenieModel);
+            await context.departments.AddAsync(departmentModel);
             await context.SaveChangesAsync();
 
-            projekt.oddeleniaId.Add(oddelenieModel.id);
+            project.departmentsId.Add(departmentModel.id);
             await context.SaveChangesAsync();
 
-            var oddelenie = await context.oddelenia
-                .Include(x => x.veduciOddelenia)
-                .FirstOrDefaultAsync(x => x.id == oddelenieModel.id);
+            var department = await context.departments
+                .Include(x => x.headOfDepartment)
+                .FirstOrDefaultAsync(x => x.id == departmentModel.id);
 
-            if (oddelenie != null) {
-                return oddelenie;
+            if (department != null) {
+                return department;
             }
 
-            return oddelenieModel;
+            return departmentModel;
         }
 
-        public async Task<Oddelenie?> DeleteAsync(int id)
+        public async Task<Department?> DeleteAsync(int id)
         {
-            var oddelenie = await context.oddelenia.FirstOrDefaultAsync(o => o.id == id);
+            var department = await context.departments.FirstOrDefaultAsync(o => o.id == id);
 
-            if (oddelenie == null) {
+            if (department == null) {
                 return null;
             }
 
-            context.oddelenia.Remove(oddelenie);
+            context.departments.Remove(department);
             await context.SaveChangesAsync();
 
-            var projekt = await context.projekty.FirstOrDefaultAsync(p => p.id == oddelenie.projektId);
+            var project = await context.projects.FirstOrDefaultAsync(p => p.id == department.projectId);
 
-            if (projekt != null) {
-                projekt.oddeleniaId.Remove(oddelenie.id);
+            if (project != null) {
+                project.departmentsId.Remove(department.id);
                 await context.SaveChangesAsync();
             }
 
-            return oddelenie;
+            return department;
         }
 
-        public async Task<List<Oddelenie>> GetAllAsync()
+        public async Task<List<Department>> GetAllAsync()
         {
-            return await context.oddelenia
-                .Include(o => o.veduciOddelenia).ToListAsync();
+            return await context.departments
+                .Include(o => o.headOfDepartment).ToListAsync();
         }
 
-        public async Task<Oddelenie?> GetByIdAsync(int id)
+        public async Task<Department?> GetByIdAsync(int id)
         {
-            return await context.oddelenia
-                .Include(o => o.veduciOddelenia).FirstOrDefaultAsync(o => o.id == id);
+            return await context.departments
+                .Include(o => o.headOfDepartment).FirstOrDefaultAsync(o => o.id == id);
         }
 
-        public async Task<Oddelenie?> UpdateAsync(int projektId, int oddelenieId, UpdateOddelenieRequestDto oddelenieDto)
+        public async Task<Department?> UpdateAsync(int projectId, int departmentId, UpdateDepartmentRequestDto departmentDto)
         {
-            var oddelenieModel = await context.oddelenia
-                .Include(o => o.veduciOddelenia)
-                .FirstOrDefaultAsync(o => o.id == oddelenieId);
+            var departmentModel = await context.departments
+                .Include(o => o.headOfDepartment)
+                .FirstOrDefaultAsync(o => o.id == departmentId);
 
-            if (oddelenieModel == null) {
+            if (departmentModel == null) {
                 return null;
             }
 
-            if (oddelenieModel.projektId != projektId) {
-                var removeFromProjekt = await context.projekty.FirstOrDefaultAsync(p => p.id == oddelenieModel.projektId);
-                var addToProjekt = await context.projekty.FirstOrDefaultAsync(p => p.id == projektId);
+            if (departmentModel.projectId != projectId) {
+                var removeFromProject = await context.projects.FirstOrDefaultAsync(p => p.id == departmentModel.projectId);
+                var addToProject = await context.projects.FirstOrDefaultAsync(p => p.id == projectId);
 
-                if (removeFromProjekt != null) {
-                    removeFromProjekt.oddeleniaId.Remove(oddelenieId);
+                if (removeFromProject != null) {
+                    removeFromProject.departmentsId.Remove(departmentId);
                 }
 
-                if (addToProjekt == null) {
+                if (addToProject == null) {
                     return null;
                 }
 
-                addToProjekt.oddeleniaId.Add(oddelenieId);
+                addToProject.departmentsId.Add(departmentId);
             }
 
-            oddelenieModel.nazov = oddelenieDto.nazov;
-            oddelenieModel.kod = oddelenieDto.kod;
-            oddelenieModel.veduciOddeleniaId = oddelenieDto.veduciOddeleniaId;
-            oddelenieModel.projektId = projektId;
+            departmentModel.name = departmentDto.name;
+            departmentModel.code = departmentDto.code;
+            departmentModel.headOfDepartmentId = departmentDto.headOfDepartmentId;
+            departmentModel.projectId = projectId;
 
             await context.SaveChangesAsync();
 
-            return oddelenieModel;
+            return departmentModel;
         }
     }
 }

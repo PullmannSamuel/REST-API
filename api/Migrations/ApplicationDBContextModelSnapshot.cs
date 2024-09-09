@@ -22,7 +22,7 @@ namespace api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("api.Models.Divizia", b =>
+            modelBuilder.Entity("api.Models.Company", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -30,32 +30,29 @@ namespace api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<int>("firmaId")
+                    b.Property<string>("code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("directorId")
                         .HasColumnType("int");
 
-                    b.Property<string>("kod")
+                    b.Property<string>("divisionsId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("nazov")
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("projektyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("veduciDivizieId")
-                        .HasColumnType("int");
 
                     b.HasKey("id");
 
-                    b.HasIndex("veduciDivizieId");
+                    b.HasIndex("directorId");
 
-                    b.ToTable("divizie");
+                    b.ToTable("companies");
                 });
 
-            modelBuilder.Entity("api.Models.Firma", b =>
+            modelBuilder.Entity("api.Models.Department", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -63,29 +60,28 @@ namespace api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("divizieId")
+                    b.Property<string>("code")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("kod")
+                    b.Property<int>("headOfDepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("nazov")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("riaditelId")
+                    b.Property<int?>("projectId")
                         .HasColumnType("int");
 
                     b.HasKey("id");
 
-                    b.HasIndex("riaditelId");
+                    b.HasIndex("headOfDepartmentId");
 
-                    b.ToTable("firmy");
+                    b.ToTable("departments");
                 });
 
-            modelBuilder.Entity("api.Models.Oddelenie", b =>
+            modelBuilder.Entity("api.Models.Division", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -93,61 +89,32 @@ namespace api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<string>("kod")
+                    b.Property<string>("code")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("nazov")
+                    b.Property<int>("companyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("headOfDivisionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("projektId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("veduciOddeleniaId")
-                        .HasColumnType("int");
+                    b.Property<string>("projectsId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
 
-                    b.HasIndex("veduciOddeleniaId");
+                    b.HasIndex("headOfDivisionId");
 
-                    b.ToTable("oddelenia");
+                    b.ToTable("divisions");
                 });
 
-            modelBuilder.Entity("api.Models.Projekt", b =>
-                {
-                    b.Property<int>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
-
-                    b.Property<int?>("diviziaId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("kod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("nazov")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("oddeleniaId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("veduciProjektuId")
-                        .HasColumnType("int");
-
-                    b.HasKey("id");
-
-                    b.HasIndex("veduciProjektuId");
-
-                    b.ToTable("projekty");
-                });
-
-            modelBuilder.Entity("api.Models.Zamestnanec", b =>
+            modelBuilder.Entity("api.Models.Employee", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -159,68 +126,101 @@ namespace api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("meno")
+                    b.Property<string>("firstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("priezvisko")
+                    b.Property<string>("lastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("telefon")
+                    b.Property<string>("phoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("titul")
+                    b.Property<string>("title")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
 
-                    b.ToTable("zamestnanci");
+                    b.ToTable("employees");
                 });
 
-            modelBuilder.Entity("api.Models.Divizia", b =>
+            modelBuilder.Entity("api.Models.Project", b =>
                 {
-                    b.HasOne("api.Models.Zamestnanec", "veduciDivizie")
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<string>("code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("departmentsId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("divisionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("projectManagerId")
+                        .HasColumnType("int");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("projectManagerId");
+
+                    b.ToTable("projects");
+                });
+
+            modelBuilder.Entity("api.Models.Company", b =>
+                {
+                    b.HasOne("api.Models.Employee", "director")
                         .WithMany()
-                        .HasForeignKey("veduciDivizieId")
+                        .HasForeignKey("directorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("veduciDivizie");
+                    b.Navigation("director");
                 });
 
-            modelBuilder.Entity("api.Models.Firma", b =>
+            modelBuilder.Entity("api.Models.Department", b =>
                 {
-                    b.HasOne("api.Models.Zamestnanec", "riaditel")
+                    b.HasOne("api.Models.Employee", "headOfDepartment")
                         .WithMany()
-                        .HasForeignKey("riaditelId")
+                        .HasForeignKey("headOfDepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("riaditel");
+                    b.Navigation("headOfDepartment");
                 });
 
-            modelBuilder.Entity("api.Models.Oddelenie", b =>
+            modelBuilder.Entity("api.Models.Division", b =>
                 {
-                    b.HasOne("api.Models.Zamestnanec", "veduciOddelenia")
+                    b.HasOne("api.Models.Employee", "headOfDivision")
                         .WithMany()
-                        .HasForeignKey("veduciOddeleniaId")
+                        .HasForeignKey("headOfDivisionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("veduciOddelenia");
+                    b.Navigation("headOfDivision");
                 });
 
-            modelBuilder.Entity("api.Models.Projekt", b =>
+            modelBuilder.Entity("api.Models.Project", b =>
                 {
-                    b.HasOne("api.Models.Zamestnanec", "veduciProjektu")
+                    b.HasOne("api.Models.Employee", "projectManager")
                         .WithMany()
-                        .HasForeignKey("veduciProjektuId")
+                        .HasForeignKey("projectManagerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("veduciProjektu");
+                    b.Navigation("projectManager");
                 });
 #pragma warning restore 612, 618
         }
