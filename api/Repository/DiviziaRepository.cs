@@ -26,8 +26,9 @@ namespace api.Repository
             }
 
             await context.divizie.AddAsync(diviziaModel);
-            firma.divizieId.Add(diviziaModel.id);
+            await context.SaveChangesAsync();
 
+            firma.divizieId.Add(diviziaModel.id);
             await context.SaveChangesAsync();
 
             var divizia = await context.divizie
@@ -54,18 +55,12 @@ namespace api.Repository
 
             var firma = await context.firmy.FirstOrDefaultAsync(f => f.id == divizia.firmaId);
             
-            if (firma != null) 
-            {
+            if (firma != null) {
                 firma.divizieId.Remove(divizia.id);
                 await context.SaveChangesAsync();
             }
             
             return divizia;
-        }
-
-        public async Task<bool> DiviziaExists(int id)
-        {
-            return await context.divizie.AnyAsync(d => d.id == id);
         }
 
         public async Task<List<Divizia>> GetAllAsync()
@@ -84,19 +79,19 @@ namespace api.Repository
         {
             var diviziaModel = await context.divizie
                 .Include(d => d.veduciDivizie)
-                .FirstOrDefaultAsync(f => f.id == diviziaId);
+                .FirstOrDefaultAsync(d => d.id == diviziaId);
 
             if (diviziaModel == null) {
                 return null;
             }
 
-            if (diviziaModel.firmaId != firmaId) 
-            {
+            if (diviziaModel.firmaId != firmaId) {
                 var removeFromFirma = await context.firmy.FirstOrDefaultAsync(f => f.id == diviziaModel.firmaId);
                 var addToFirma = await context.firmy.FirstOrDefaultAsync(f => f.id == firmaId);
+                
                 if (removeFromFirma != null) 
                 {
-                    removeFromFirma.divizieId.Remove(diviziaModel.firmaId);
+                    removeFromFirma.divizieId.Remove(diviziaId);
                 }
 
                 if (addToFirma == null)
@@ -114,6 +109,11 @@ namespace api.Repository
             await context.SaveChangesAsync();
 
             return diviziaModel;
+        }
+
+        public async Task<bool> DiviziaExists(int id)
+        {
+            return await context.divizie.AnyAsync(d => d.id == id);
         }
     }
 }

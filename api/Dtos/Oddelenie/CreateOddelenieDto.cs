@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using api.Models;
 
-namespace api.Dtos.Firma
+namespace api.Dtos.Oddelenie
 {
-    public class UpdateFirmaRequestDto
+    public class CreateOddelenieDto
     {
         [Required]
         [MinLength(1, ErrorMessage = "Nazov musi obsahovat aspon 1 znak")]
@@ -17,6 +16,6 @@ namespace api.Dtos.Firma
         [MinLength(1, ErrorMessage = "Kod musi obsahovat aspon 1 znak")]
         [MaxLength(50, ErrorMessage = "Kod nesmie prekracovat 50 znakov")]
         public string kod { get; set; } = string.Empty;
-        public int riaditelId { get; set; }
+        public int veduciOddeleniaId { get; set; }
     }
 }

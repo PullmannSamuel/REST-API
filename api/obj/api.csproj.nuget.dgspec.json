@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projekty\\Kros\\api\\api.csproj": {}
+    "D:\\Projekty\\KrosZadanie\\api\\api.csproj": {}
   },
   "projects": {
-    "D:\\Projekty\\Kros\\api\\api.csproj": {
+    "D:\\Projekty\\KrosZadanie\\api\\api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projekty\\Kros\\api\\api.csproj",
+        "projectUniqueName": "D:\\Projekty\\KrosZadanie\\api\\api.csproj",
         "projectName": "api",
-        "projectPath": "D:\\Projekty\\Kros\\api\\api.csproj",
+        "projectPath": "D:\\Projekty\\KrosZadanie\\api\\api.csproj",
         "packagesPath": "C:\\Users\\S. Pullmann\\.nuget\\packages\\",
-        "outputPath": "D:\\Projekty\\Kros\\api\\obj\\",
+        "outputPath": "D:\\Projekty\\KrosZadanie\\api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\S. Pullmann\\AppData\\Roaming\\NuGet\\NuGet.Config",

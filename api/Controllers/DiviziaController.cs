@@ -49,12 +49,12 @@ namespace api.Controllers
         [HttpPost("{firmaId}")]
         public async Task<IActionResult> Create([FromRoute] int firmaId, [FromBody] CreateDiviziaDto diviziaDto)
         {
-            if (!await firmaRepo.FirmaExists(firmaId)) {
-                return BadRequest($"Firma s id {firmaId} neexistuje!");
-            }
-
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
+            }
+
+            if (!await firmaRepo.FirmaExists(firmaId)) {
+                return BadRequest($"Firma s id {firmaId} neexistuje!");
             }
 
             var diviziaModel = diviziaDto.ToDiviziaFromCreate(firmaId);

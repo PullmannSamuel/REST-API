@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ApplicationDBContext>(options => {
 
 builder.Services.AddScoped<IFirmaRepository, FirmaRepository>();
 builder.Services.AddScoped<IDiviziaRepository, DiviziaRepository>();
+builder.Services.AddScoped<IProjektRepository, ProjektRepository>();
+builder.Services.AddScoped<IOddelenieRepository, OddelenieRepository>();
 builder.Services.AddScoped<IZamestnanecRepository, ZamestnanecRepository>();
 
 var app = builder.Build();

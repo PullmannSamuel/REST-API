@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "o9gTPirc4gE=",
+  "dgSpecHash": "b7ei/uE1Z34=",
   "success": true,
-  "projectFilePath": "D:\\Projekty\\Kros\\api\\api.csproj",
+  "projectFilePath": "D:\\Projekty\\KrosZadanie\\api\\api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\S. Pullmann\\.nuget\\packages\\azure.core\\1.35.0\\azure.core.1.35.0.nupkg.sha512",
     "C:\\Users\\S. Pullmann\\.nuget\\packages\\azure.identity\\1.10.3\\azure.identity.1.10.3.nupkg.sha512",

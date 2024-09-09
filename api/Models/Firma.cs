@@ -15,6 +15,5 @@ namespace api.Models
         public string? menoVeduceho => $"{riaditel?.meno} {riaditel?.priezvisko}";
         public List<int> divizieId { get; private set; } = new List<int>();
         
-        
     }
 }
