@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Company;
+using api.Helpers;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +18,19 @@ namespace api.Controllers
     {
         private readonly ApplicationDBContext context;
         private readonly ICompanyRepository companyRepo;
+        private readonly IEmployeeRepository employeeRepo;
 
-        public CompanyController(ApplicationDBContext context, ICompanyRepository companyRepo)
+        public CompanyController(ApplicationDBContext context, ICompanyRepository companyRepo, IEmployeeRepository employeeRepo)
         {
             this.context = context;
             this.companyRepo = companyRepo;
+            this.employeeRepo = employeeRepo;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() 
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query) 
         {
-            var companies = await companyRepo.GetAllAsync();
+            var companies = await companyRepo.GetAllAsync(query);
 
             var companiesDto = companies.Select(f => f.ToCompanyDto());
 
@@ -53,6 +56,12 @@ namespace api.Controllers
                 return BadRequest(ModelState);
             }
 
+            var employeeExists = await employeeRepo.EmployeeExists(companyDto.directorId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid director ID.");
+            }
+
             var companyModel = companyDto.ToCompanyFromCreateDto();
             await companyRepo.CreateAsync(companyModel);
             
@@ -60,13 +69,19 @@ namespace api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCompanyRequestDto updateDto)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateCompanyRequestDto companyDto)
         {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
 
-            var companyModel = await companyRepo.UpdateAsync(id, updateDto);
+            var employeeExists = await employeeRepo.EmployeeExists(companyDto.directorId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid director ID.");
+            }
+
+            var companyModel = await companyRepo.UpdateAsync(id, companyDto);
 
             if (companyModel == null) {
                 return NotFound();

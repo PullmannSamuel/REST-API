@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Dtos.Project;
+using api.Helpers;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,18 @@ namespace api.Controllers
     {
         private readonly IProjectRepository projectRepo;
         private readonly IDivisionRepository divisionRepo;
-        public ProjectController(IProjectRepository projectRepo, IDivisionRepository divisionRepo)
+        private readonly IEmployeeRepository employeeRepo;
+        public ProjectController(IProjectRepository projectRepo, IDivisionRepository divisionRepo, IEmployeeRepository employeeRepo)
         {
             this.projectRepo = projectRepo;
             this.divisionRepo = divisionRepo;
+            this.employeeRepo = employeeRepo;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var projects = await projectRepo.GetAllAsync();
+            var projects = await projectRepo.GetAllAsync(query);
 
             var projectsDto = projects.Select(p => p.ToProjectDto());
 
@@ -54,6 +57,12 @@ namespace api.Controllers
                 return BadRequest($"Division with id {divisionId} doesnt exist!");
             }
 
+            var employeeExists = await employeeRepo.EmployeeExists(projectDto.projectManagerId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid project manager ID.");
+            }
+
             var projectModel = projectDto.ToProjectFromCreate(divisionId);
             await projectRepo.CreateAsync(projectModel);
 
@@ -69,6 +78,12 @@ namespace api.Controllers
 
             if (!await divisionRepo.DivisionExists(divisionId)) {
                 return BadRequest($"Division with id {divisionId} doesnt exist!");
+            }
+
+            var employeeExists = await employeeRepo.EmployeeExists(projectDto.projectManagerId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid project manager ID.");
             }
 
             var projectModel = await projectRepo.UpdateAsync(divisionId, projectId, projectDto);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Dtos.Department;
+using api.Helpers;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,18 @@ namespace api.Controllers
     {
         private readonly IDepartmentRepository departmentRepo;
         private readonly IProjectRepository projectRepo;
-        public DepartmentController(IDepartmentRepository departmentRepo, IProjectRepository projectRepo)
+        private readonly IEmployeeRepository employeeRepo;
+        public DepartmentController(IDepartmentRepository departmentRepo, IProjectRepository projectRepo, IEmployeeRepository employeeRepo)
         {
             this.departmentRepo = departmentRepo;
             this.projectRepo = projectRepo;
+            this.employeeRepo = employeeRepo;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var departments = await departmentRepo.GetAllAsync();
+            var departments = await departmentRepo.GetAllAsync(query);
 
             var departmentsDto = departments.Select(o => o.ToDepartmentDto());
 
@@ -54,6 +57,12 @@ namespace api.Controllers
                 return BadRequest($"Project with id {projectId} doesnt exist!");
             }
 
+            var employeeExists = await employeeRepo.EmployeeExists(departmentDto.headOfDepartmentId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid head of department ID.");
+            }
+
             var departmentModel = departmentDto.ToDepartmentFromCreate(projectId);
             await departmentRepo.CreateAsync(departmentModel);
 
@@ -69,6 +78,12 @@ namespace api.Controllers
 
             if (!await projectRepo.ProjectExists(projectId)) {
                 return BadRequest($"Project with id {projectId} doesnt exist!");
+            }
+
+            var employeeExists = await employeeRepo.EmployeeExists(departmentDto.headOfDepartmentId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid head of department ID.");
             }
 
             var departmentModel = await departmentRepo.UpdateAsync(projectId, departmentId, departmentDto);

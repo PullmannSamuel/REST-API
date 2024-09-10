@@ -18,12 +18,10 @@ namespace api.Dtos.Employee
         [MaxLength(30, ErrorMessage = "Last name cant be longer than 30 characters")]
         public string lastName { get; set; } = string.Empty;
         [Required]
-        [MinLength(10, ErrorMessage = "Phonenumber must contain atleast 1 character")]
-        [MaxLength(20, ErrorMessage = "Phonenumber cant be longer than 20 characters")]
+        [Phone]
         public string phoneNumber { get; set; } = string.Empty;
         [Required]
-        [MinLength(1, ErrorMessage = "Email must contain atleast 1 character")]
-        [MaxLength(50, ErrorMessage = "Email cant be longer than 20 characters")]
+        [EmailAddress]
         public string email { get; set; } = string.Empty;
     }
 }

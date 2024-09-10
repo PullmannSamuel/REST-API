@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Division;
+using api.Helpers;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +18,20 @@ namespace api.Controllers
 
         private readonly IDivisionRepository divisionRepo;
         private readonly ICompanyRepository companyRepo;
+        private readonly IEmployeeRepository employeeRepo;
 
-        public DivisionController(IDivisionRepository divisionRepo, ICompanyRepository companyRepo)
+        public DivisionController(IDivisionRepository divisionRepo, 
+            ICompanyRepository companyRepo, IEmployeeRepository employeeRepo)
         {
             this.divisionRepo = divisionRepo;
             this.companyRepo = companyRepo;
+            this.employeeRepo = employeeRepo;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var divisions = await divisionRepo.GetAllAsync();
+            var divisions = await divisionRepo.GetAllAsync(query);
 
             var divisionsDto = divisions.Select(d => d.ToDivisionDto());
 
@@ -57,6 +61,12 @@ namespace api.Controllers
                 return BadRequest($"Company with id {companyId} doesnt exist!");
             }
 
+            var employeeExists = await employeeRepo.EmployeeExists(divisionDto.headOfDivisionId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid head of division ID.");
+            }
+
             var divisionModel = divisionDto.ToDivisionFromCreate(companyId);
             await divisionRepo.CreateAsync(divisionModel);
 
@@ -66,12 +76,18 @@ namespace api.Controllers
         [HttpPut("{companyId}/divisions/{divisionId}")]
         public async Task<IActionResult> Update([FromRoute] int companyId, [FromRoute] int divisionId, [FromBody] UpdateDivisionRequestDto divisionDto)
         {
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
+
             if (!await companyRepo.CompanyExists(companyId)) {
                 return BadRequest($"Company with id {companyId} doesnt exist!");
             }
 
-            if (!ModelState.IsValid) {
-                return BadRequest(ModelState);
+            var employeeExists = await employeeRepo.EmployeeExists(divisionDto.headOfDivisionId);
+            if (!employeeExists)
+            {
+                return BadRequest("Invalid head of division ID.");
             }
 
             var divisionModel = await divisionRepo.UpdateAsync(companyId, divisionId, divisionDto);

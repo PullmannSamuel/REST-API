@@ -17,6 +17,7 @@ namespace api.Dtos.Company
         [MinLength(1, ErrorMessage = "Code must contain atleast 1 character")]
         [MaxLength(50, ErrorMessage = "Code cant be longer than 50 characters")]
         public string code { get; set; } = string.Empty;
+        [Required]
         public int directorId { get; set; }
 
     }
