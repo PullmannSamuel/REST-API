@@ -23,6 +23,7 @@ namespace api.Repository
         {
             var project = await context.projects.FirstOrDefaultAsync(p => p.id == departmentModel.projectId);
 
+            // Check if the project exists before adding the department
             if (project == null) {
                 return departmentModel;
             }
@@ -30,8 +31,10 @@ namespace api.Repository
             await context.departments.AddAsync(departmentModel);
             await context.SaveChangesAsync();
 
+            // Update project to include new department ID
             project.departmentsId.Add(departmentModel.id);
             await context.SaveChangesAsync();
+
 
             var department = await context.departments
                 .Include(x => x.headOfDepartment)
@@ -41,7 +44,7 @@ namespace api.Repository
                 return department;
             }
 
-            return departmentModel;
+            return departmentModel; // In case Include fails, return original object
         }
 
         public async Task<Department?> DeleteAsync(int id)
@@ -55,6 +58,7 @@ namespace api.Repository
             context.departments.Remove(department);
             await context.SaveChangesAsync();
 
+            // Remove department ID from associated project
             var project = await context.projects.FirstOrDefaultAsync(p => p.id == department.projectId);
 
             if (project != null) {
@@ -70,6 +74,7 @@ namespace api.Repository
             var departments = context.departments
                 .Include(o => o.headOfDepartment).AsQueryable();
 
+            // Apply filters based on query parameters
             if (!string.IsNullOrWhiteSpace(query.name)) {
                 departments = departments.Where(d => d.name.Contains(query.name));
             }
@@ -97,6 +102,7 @@ namespace api.Repository
                 return null;
             }
 
+            // Handle project change if department is moved to a different project
             if (departmentModel.projectId != projectId) {
                 var removeFromProject = await context.projects.FirstOrDefaultAsync(p => p.id == departmentModel.projectId);
                 var addToProject = await context.projects.FirstOrDefaultAsync(p => p.id == projectId);
@@ -112,6 +118,7 @@ namespace api.Repository
                 addToProject.departmentsId.Add(departmentId);
             }
 
+            // Update department details
             departmentModel.name = departmentDto.name;
             departmentModel.code = departmentDto.code;
             departmentModel.headOfDepartmentId = departmentDto.headOfDepartmentId;

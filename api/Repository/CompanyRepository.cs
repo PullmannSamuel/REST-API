@@ -32,7 +32,7 @@ namespace api.Repository
                 return company;
             }
 
-            return companyModel;
+            return companyModel; // In case Include fails, return original object
         }
 
         public async Task<Company?> DeleteAsync(int id)
@@ -54,6 +54,7 @@ namespace api.Repository
             var companies = context.companies
                 .Include(f => f.director).AsQueryable();
 
+            // Apply filters based on query parameters
             if (!string.IsNullOrWhiteSpace(query.name)) {
                 companies = companies.Where(c => c.name.Contains(query.name));
             }
@@ -81,6 +82,7 @@ namespace api.Repository
                 return null;
             }
 
+            // Update the company fields with new values
             companyModel.name = companyDto.name;
             companyModel.code = companyDto.code;
             companyModel.directorId = companyDto.directorId;

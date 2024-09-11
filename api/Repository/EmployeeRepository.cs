@@ -58,6 +58,7 @@ namespace api.Repository
                 return null;
             }
 
+            // Update employee details
             employeeModel.title = employeeDto.title;
             employeeModel.firstName = employeeDto.firstName;
             employeeModel.lastName = employeeDto.lastName;

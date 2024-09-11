@@ -41,7 +41,7 @@ namespace api.Repository
                 return project;
             }
 
-            return projectModel;
+            return projectModel; // In case Include fails, return original object
         }
 
         public async Task<Project?> DeleteAsync(int id)
@@ -70,6 +70,7 @@ namespace api.Repository
             var projects = context.projects
                 .Include(p => p.projectManager).AsQueryable();
 
+            // Apply filters based on query parameters
             if (!string.IsNullOrWhiteSpace(query.name)) {
                 projects = projects.Where(p => p.name.Contains(query.name));
             }

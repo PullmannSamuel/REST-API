@@ -21,6 +21,8 @@ namespace api.Repository
         public async Task<Division> CreateAsync(Division divisionModel)
         {
             var company = await context.companies.FirstOrDefaultAsync(f => f.id == divisionModel.companyId);
+            
+            // Ensure the associated company exists before adding the division
             if (company == null)
             {
                 return divisionModel;
@@ -29,6 +31,7 @@ namespace api.Repository
             await context.divisions.AddAsync(divisionModel);
             await context.SaveChangesAsync();
 
+            // Update company to include new division ID
             company.divisionsId.Add(divisionModel.id);
             await context.SaveChangesAsync();
 
@@ -40,7 +43,7 @@ namespace api.Repository
                 return division;
             }
 
-            return divisionModel;
+            return divisionModel; // In case Include fails, return original object
         }
 
         public async Task<Division?> DeleteAsync(int id)
@@ -54,6 +57,7 @@ namespace api.Repository
             context.divisions.Remove(division);
             await context.SaveChangesAsync();
 
+            // Update company to remove division ID
             var company = await context.companies.FirstOrDefaultAsync(f => f.id == division.companyId);
             
             if (company != null) {
@@ -69,6 +73,7 @@ namespace api.Repository
             var divisions =  context.divisions
                 .Include(d => d.headOfDivision).AsQueryable();
                 
+            // Apply filters based on query parameters
             if (!string.IsNullOrWhiteSpace(query.name)) {
                 divisions = divisions.Where(d => d.name.Contains(query.name));
             }
@@ -93,9 +98,10 @@ namespace api.Repository
                 .FirstOrDefaultAsync(d => d.id == divisionId);
 
             if (divisionModel == null) {
-                return null;
+                return null; // Return null if division not found
             }
 
+            // Handle company change if division is moved to a different company
             if (divisionModel.companyId != companyId) {
                 var removeFromCompany = await context.companies.FirstOrDefaultAsync(f => f.id == divisionModel.companyId);
                 var addToCompany = await context.companies.FirstOrDefaultAsync(f => f.id == companyId);
@@ -112,6 +118,7 @@ namespace api.Repository
                 addToCompany.divisionsId.Add(divisionId);
             }
 
+            // Update division details
             divisionModel.name = divisionDto.name;
             divisionModel.code = divisionDto.code;
             divisionModel.headOfDivisionId = divisionDto.headOfDivisionId;
